@@ -61,7 +61,6 @@ export function MonthlyIncomeCard({
 
 export default function IncomeCharts({
 	monthlyIncome,
-	overallIncome,
 }: IncomeChartsProps) {
 	const monthlyData = Object.entries(monthlyIncome)
 		.map(([month, income]) => ({
