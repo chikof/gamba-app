@@ -1,20 +1,19 @@
-import { Transaction } from '@/types/transaction';
+import type { Transaction } from "@/types/transaction";
 
 export function calculateIncome(transactions: Transaction[]) {
-  const monthlyIncome: { [key: string]: number } = {};
-  let overallIncome = 0;
+	const monthlyIncome: { [key: string]: number } = {};
+	let overallIncome = 0;
 
-  transactions.forEach((transaction) => {
-    const monthYear = transaction.date.substring(0, 7); // YYYY-MM
+	for (const transaction of transactions) {
+		const monthYear = transaction.date.slice(0, 7);
 
-    if (!monthlyIncome[monthYear]) {
-      monthlyIncome[monthYear] = 0;
-    }
+		if (!monthlyIncome[monthYear]) {
+			monthlyIncome[monthYear] = 0;
+		}
 
-    monthlyIncome[monthYear] += transaction.amount;
-    overallIncome += transaction.amount;
-  });
+		monthlyIncome[monthYear] += transaction.amount;
+		overallIncome += transaction.amount;
+	}
 
-  return { monthlyIncome, overallIncome };
+	return { monthlyIncome, overallIncome };
 }
-

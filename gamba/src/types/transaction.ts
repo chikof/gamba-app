@@ -1,7 +1,6 @@
 export interface Transaction {
-  id: string;
-  date: string;
-  bookmaker: string;
-  amount: number;
+	id: string;
+	date: string;
+	bookmaker: string;
+	amount: number;
 }
-
