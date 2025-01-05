@@ -6,11 +6,13 @@ export async function GET(req: NextRequest) {
 	const code = req.nextUrl.searchParams.get('code');
 	const state = req.nextUrl.searchParams.get('state');
 
+	const cookieStore = await cookies();
+
 	if (!code || !state) {
 		return NextResponse.redirect('/');
 	}
 
-	const csrfState = (await cookies()).get('auth_csrf_state');
+	const csrfState = cookieStore.get('auth_csrf_state');
 
 	if (csrfState?.value !== state) {
 		return NextResponse.redirect('/');
@@ -22,7 +24,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.redirect('/');
 	}
 
-	(await cookies()).set('gamba_session', auth.gamba_session, {
+	cookieStore.set('gamba_session', auth.gamba_session, {
 		// 90 days
 		maxAge: 60 * 60 * 24 * 90
 	});

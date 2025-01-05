@@ -2,11 +2,12 @@ import { getAuthenticationURI } from '@/lib/actions';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
 	const { url, state } = await getAuthenticationURI();
+	const cookieStore = await cookies();
 
 	// Set the state cookie
-	(await cookies()).set('auth_csrf_state', state, {
+	cookieStore.set('auth_csrf_state', state, {
 		maxAge: 60 * 60
 	});
 
