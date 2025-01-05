@@ -10,6 +10,12 @@ export async function GET(req: NextRequest) {
 		return NextResponse.redirect('/');
 	}
 
+	const csrfState = (await cookies()).get('auth_csrf_state');
+
+	if (csrfState?.value !== state) {
+		return NextResponse.redirect('/');
+	}
+
 	const auth = await authorizeUser(code, state);
 
 	if (!auth.gamba_session) {
