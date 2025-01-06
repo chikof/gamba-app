@@ -7,6 +7,7 @@ import { calculateIncome } from '@/lib/calculateIncome';
 import { ApiRoutes } from '@/lib/api';
 import type { AuthorizeResponse, LoginResponse } from '@/types/api/auth';
 import { isNullOrUndefined } from '@/lib/utils';
+import { UserModel } from '@/types/api/user';
 
 export async function addTransactionAction(formData: FormData) {
 	const transaction: Transaction = {
@@ -36,7 +37,7 @@ export async function authorizeUser(
 	const response = await fetch(
 		`${ApiRoutes.Auth.Authorize}?code=${code}&state=${state}`,
 		{
-			method: 'POST',
+			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
 			}
@@ -52,4 +53,14 @@ export async function authorizeUser(
 	const responseData = await response.json();
 
 	return { ...responseData, gamba_session };
+}
+
+export async function verifySession(session: string): Promise<UserModel> {
+	const response = await fetch(ApiRoutes.User.Me, {
+		headers: {
+			'Set-Cookie': session
+		}
+	});
+
+	return response.json();
 }

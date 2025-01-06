@@ -1,6 +1,6 @@
 import { getAuthenticationURI } from '@/lib/actions';
 import { cookies } from 'next/headers';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
 	const { url, state } = await getAuthenticationURI();

@@ -34,7 +34,7 @@ export function IncomeCard({
 				<p
 					className={`text-2xl font-bold ${income >= 0 ? 'text-green-600' : 'text-red-600'}`}
 				>
-					${income.toFixed(2)}
+					£{income.toFixed(2)}
 				</p>
 			</CardContent>
 		</Card>

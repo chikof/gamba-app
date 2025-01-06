@@ -1,29 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { redirect } from 'next/navigation';
+import { verifySession } from '@/lib/actions';
+import { getClientCookie } from '@/lib/utils';
 
 export default function Navbar() {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [username, setUsername] = useState('');
 
-	const handleLogin = (e: React.FormEvent) => {
-		e.preventDefault();
-		// In a real app, you would handle authentication here
-		setIsLoggedIn(true);
-	};
+	useEffect(() => {
+		console.log('useEffect');
+		const sessionToken = getClientCookie('gamba_session');
+		if (!sessionToken) return;
+
+		verifySession(sessionToken).then((me) => {
+			if (me.username) {
+				setIsLoggedIn(true);
+				setUsername(me.username);
+			}
+		});
+	}, []);
 
 	const handleLogout = () => {
 		setIsLoggedIn(false);
@@ -45,59 +44,23 @@ export default function Navbar() {
 							</Button>
 						</div>
 					) : (
-						<Dialog>
-							<DialogTrigger asChild>
-								<Button variant="secondary">Login</Button>
-							</DialogTrigger>
-							<DialogContent className="sm:max-w-[425px]">
-								<DialogHeader>
-									<DialogTitle>Login</DialogTitle>
-									<DialogDescription>
-										Enter your credentials to access your
-										account.
-									</DialogDescription>
-								</DialogHeader>
-								<form onSubmit={handleLogin}>
-									<div className="grid gap-4 py-4">
-										<div className="grid grid-cols-4 items-center gap-4">
-											<Label
-												htmlFor="username"
-												className="text-right"
-											>
-												Username
-											</Label>
-											<Input
-												id="username"
-												value={username}
-												onChange={(e) =>
-													setUsername(e.target.value)
-												}
-												className="col-span-3"
-											/>
-										</div>
-										<div className="grid grid-cols-4 items-center gap-4">
-											<Label
-												htmlFor="password"
-												className="text-right"
-											>
-												Password
-											</Label>
-											<Input
-												id="password"
-												type="password"
-												className="col-span-3"
-											/>
-										</div>
-									</div>
-									<DialogFooter>
-										<Button type="submit">Login</Button>
-									</DialogFooter>
-								</form>
-							</DialogContent>
-						</Dialog>
+						<LoginButton />
 					)}
 				</div>
 			</div>
 		</nav>
+	);
+}
+
+export function LoginButton() {
+	return (
+		<Button
+			variant="secondary"
+			onClick={async () => {
+				redirect('/api/auth/login');
+			}}
+		>
+			Login
+		</Button>
 	);
 }

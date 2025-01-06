@@ -53,7 +53,7 @@ function SubmitButton() {
 }
 
 interface TransactionFormProps {
-	onNewTransaction: (data: {
+	onNewTransactionAction: (data: {
 		transactions: Transaction[];
 		monthlyIncome: { [key: string]: number };
 		overallIncome: number;
@@ -61,7 +61,7 @@ interface TransactionFormProps {
 }
 
 export default function TransactionForm({
-	onNewTransaction
+	onNewTransactionAction: onNewTransaction
 }: TransactionFormProps) {
 	const formRef = useRef<HTMLFormElement>(null);
 	const [open, setOpen] = useState(false);

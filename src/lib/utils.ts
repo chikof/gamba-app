@@ -18,3 +18,15 @@ export function isNullOrUndefined<T>(
 ): v is null | undefined {
 	return isNull(v) || isUndefined(v);
 }
+
+export function getClientCookie(name: string) {
+	if (typeof document === 'undefined') return;
+
+	const value = '; ' + document.cookie;
+	const decodedValue = decodeURIComponent(value);
+	const parts = decodedValue.split('; ' + name + '=');
+
+	if (parts.length === 2) {
+		return parts.pop()?.split(';').shift();
+	}
+}
