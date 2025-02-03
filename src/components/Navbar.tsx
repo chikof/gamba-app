@@ -1,34 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { UserModel } from '@/types/api/user';
 
 export default function Navbar() {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [username, setUsername] = useState('');
+	const [user, setUser] = useState<UserModel | null>(null);
 
-	const handleLogin = (e: React.FormEvent) => {
-		e.preventDefault();
-		// In a real app, you would handle authentication here
-		setIsLoggedIn(true);
+	const checkAuth = async () => {
+		try {
+			// Use API route instead of direct server action
+			const response = await fetch('/api/auth/me', {
+				credentials: 'include'
+			});
+
+			if (!response.ok) throw new Error('Unauthorized');
+			const userData = await response.json();
+			setUser(userData);
+		} catch (error) {
+			setUser(null);
+			console.error('Failed to get user profile:', error);
+		}
 	};
 
-	const handleLogout = () => {
-		setIsLoggedIn(false);
-		setUsername('');
+	const handleLogout = async () => {
+		try {
+			await fetch('/api/auth/logout', { method: 'POST' });
+			setUser(null);
+			window.location.reload();
+		} catch (error) {
+			console.error('Logout failed:', error);
+		}
 	};
+
+	useEffect(() => {
+		checkAuth();
+	}, []);
 
 	return (
 		<nav className="bg-primary text-primary-foreground">
@@ -37,67 +45,30 @@ export default function Navbar() {
 					Gamba
 				</Link>
 				<div>
-					{isLoggedIn ? (
+					{user ? (
 						<div className="flex items-center space-x-4">
-							<span>Welcome, {username}</span>
+							<span>Welcome, {user.username}</span>
 							<Button onClick={handleLogout} variant="secondary">
 								Logout
 							</Button>
 						</div>
 					) : (
-						<Dialog>
-							<DialogTrigger asChild>
-								<Button variant="secondary">Login</Button>
-							</DialogTrigger>
-							<DialogContent className="sm:max-w-[425px]">
-								<DialogHeader>
-									<DialogTitle>Login</DialogTitle>
-									<DialogDescription>
-										Enter your credentials to access your
-										account.
-									</DialogDescription>
-								</DialogHeader>
-								<form onSubmit={handleLogin}>
-									<div className="grid gap-4 py-4">
-										<div className="grid grid-cols-4 items-center gap-4">
-											<Label
-												htmlFor="username"
-												className="text-right"
-											>
-												Username
-											</Label>
-											<Input
-												id="username"
-												value={username}
-												onChange={(e) =>
-													setUsername(e.target.value)
-												}
-												className="col-span-3"
-											/>
-										</div>
-										<div className="grid grid-cols-4 items-center gap-4">
-											<Label
-												htmlFor="password"
-												className="text-right"
-											>
-												Password
-											</Label>
-											<Input
-												id="password"
-												type="password"
-												className="col-span-3"
-											/>
-										</div>
-									</div>
-									<DialogFooter>
-										<Button type="submit">Login</Button>
-									</DialogFooter>
-								</form>
-							</DialogContent>
-						</Dialog>
+						<LoginButton />
 					)}
 				</div>
 			</div>
 		</nav>
+	);
+}
+
+export function LoginButton() {
+	const handleLogin = () => {
+		window.location.href = '/api/auth/login';
+	};
+
+	return (
+		<Button variant="secondary" onClick={handleLogin}>
+			Login
+		</Button>
 	);
 }

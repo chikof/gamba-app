@@ -55,7 +55,7 @@ export default function Home() {
 						</div>
 						<div className="mb-4">
 							<TransactionForm
-								onNewTransaction={handleNewTransaction}
+								onNewTransactionAction={handleNewTransaction}
 							/>
 						</div>
 						<IncomeCharts
