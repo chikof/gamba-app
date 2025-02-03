@@ -64,7 +64,7 @@ export default function TransactionTable({
 			<CardHeader>
 				<CardTitle>Transaction Log</CardTitle>
 			</CardHeader>
-			<CardContent className="flex-grow flex flex-col">
+			<CardContent className="grow flex flex-col">
 				<div className="flex justify-between items-center mb-4">
 					<Select
 						value={itemsPerPage.toString()}
@@ -85,7 +85,7 @@ export default function TransactionTable({
 					</Select>
 					<Button onClick={goToLastPage}>Go to Last Page</Button>
 				</div>
-				<div className="flex-grow overflow-auto">
+				<div className="grow overflow-auto">
 					<Table>
 						<TableHeader>
 							<TableRow>

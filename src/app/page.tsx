@@ -42,7 +42,7 @@ export default function Home() {
 	return (
 		<div className="min-h-screen flex flex-col">
 			<Navbar />
-			<main className="flex-grow container mx-auto p-4">
+			<main className="grow container mx-auto p-4">
 				<div className="flex flex-col md:flex-row gap-4">
 					<div className="w-full md:w-1/2">
 						<TransactionTable transactions={transactions} />
