@@ -19,8 +19,6 @@ export async function GET(req: NextRequest) {
 		// const cookieStore = await cookies();
 		// const cookie = cookieStore.get('gamba_session')?.value || '';
 
-		console.log(req.headers);
-
 		const auth = await authorizeUser(code, state, session_cookie);
 		const response = NextResponse.redirect(url);
 
