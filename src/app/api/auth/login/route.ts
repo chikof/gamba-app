@@ -1,15 +1,16 @@
-import { getAuthenticationURI } from '@/lib/actions';
-import { cookies } from 'next/headers';
+import { getLoginLink } from '@/lib/actions';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-	const { url, state } = await getAuthenticationURI();
-	const cookieStore = await cookies();
+	try {
+		const { url, cookie } = await getLoginLink();
+		const response = NextResponse.redirect(url);
 
-	// Set the state cookie
-	cookieStore.set('auth_csrf_state', state, {
-		maxAge: 60 * 60
-	});
+		// Forward the Set-Cookie header directly from backend
+		response.headers.append('Set-Cookie', cookie);
 
-	return NextResponse.redirect(url);
+		return response;
+	} catch (error) {
+		return new Response('Authentication failed', { status: 500 });
+	}
 }

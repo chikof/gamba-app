@@ -3,31 +3,40 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { redirect } from 'next/navigation';
-import { verifySession } from '@/lib/actions';
-import { getClientCookie } from '@/lib/utils';
+import { UserModel } from '@/types/api/user';
 
 export default function Navbar() {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [username, setUsername] = useState('');
+	const [user, setUser] = useState<UserModel | null>(null);
+
+	const checkAuth = async () => {
+		try {
+			// Use API route instead of direct server action
+			const response = await fetch('/api/auth/me', {
+				credentials: 'include'
+			});
+
+			if (!response.ok) throw new Error('Unauthorized');
+			const userData = await response.json();
+			setUser(userData);
+		} catch (error) {
+			setUser(null);
+			console.error('Failed to get user profile:', error);
+		}
+	};
+
+	const handleLogout = async () => {
+		try {
+			await fetch('/api/auth/logout', { method: 'POST' });
+			setUser(null);
+			window.location.reload();
+		} catch (error) {
+			console.error('Logout failed:', error);
+		}
+	};
 
 	useEffect(() => {
-		console.log('useEffect');
-		const sessionToken = getClientCookie('gamba_session');
-		if (!sessionToken) return;
-
-		verifySession(sessionToken).then((me) => {
-			if (me.username) {
-				setIsLoggedIn(true);
-				setUsername(me.username);
-			}
-		});
+		checkAuth();
 	}, []);
-
-	const handleLogout = () => {
-		setIsLoggedIn(false);
-		setUsername('');
-	};
 
 	return (
 		<nav className="bg-primary text-primary-foreground">
@@ -36,9 +45,9 @@ export default function Navbar() {
 					Gamba
 				</Link>
 				<div>
-					{isLoggedIn ? (
+					{user ? (
 						<div className="flex items-center space-x-4">
-							<span>Welcome, {username}</span>
+							<span>Welcome, {user.username}</span>
 							<Button onClick={handleLogout} variant="secondary">
 								Logout
 							</Button>
@@ -53,13 +62,12 @@ export default function Navbar() {
 }
 
 export function LoginButton() {
+	const handleLogin = () => {
+		window.location.href = '/api/auth/login';
+	};
+
 	return (
-		<Button
-			variant="secondary"
-			onClick={async () => {
-				redirect('/api/auth/login');
-			}}
-		>
+		<Button variant="secondary" onClick={handleLogin}>
 			Login
 		</Button>
 	);

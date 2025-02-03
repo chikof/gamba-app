@@ -1,12 +1,9 @@
-'use server';
-
 import { v4 as uuidv4 } from 'uuid';
 import { addTransaction, getTransactions } from '@/lib/store';
 import type { Transaction } from '@/types/transaction';
 import { calculateIncome } from '@/lib/calculateIncome';
 import { ApiRoutes } from '@/lib/api';
 import type { AuthorizeResponse, LoginResponse } from '@/types/api/auth';
-import { isNullOrUndefined } from '@/lib/utils';
 import { UserModel } from '@/types/api/user';
 
 export async function addTransactionAction(formData: FormData) {
@@ -25,42 +22,46 @@ export async function addTransactionAction(formData: FormData) {
 	return { transactions: updatedTransactions, monthlyIncome, overallIncome };
 }
 
-export async function getAuthenticationURI(): Promise<LoginResponse> {
-	const response = await fetch(ApiRoutes.Auth.Login);
-	return response.json();
+export async function getLoginLink() {
+	const response = await fetch(ApiRoutes.Auth.Login, {
+		credentials: 'include'
+	});
+
+	const cookie = response.headers.get('Set-Cookie');
+	const data = (await response.json()) as LoginResponse;
+
+	return {
+		url: data.redirect_url,
+		cookie: cookie || ''
+	};
+}
+
+export async function getUserProfile() {
+	const response = await fetch(ApiRoutes.User.Me, {
+		credentials: 'include'
+	});
+	return (await response.json()) as UserModel;
 }
 
 export async function authorizeUser(
 	code: string,
-	state: string
-): Promise<AuthorizeResponse & { gamba_session: string }> {
+	state: string,
+	session_cookie: string
+) {
 	const response = await fetch(
 		`${ApiRoutes.Auth.Authorize}?code=${code}&state=${state}`,
 		{
-			method: 'GET',
 			headers: {
-				'Content-Type': 'application/json'
+				Cookie: `gamba_session=${session_cookie}`
 			}
 		}
 	);
 
-	const gamba_session = response.headers.get('Set-Cookie');
+	const cookie = response.headers.get('Set-Cookie');
+	const data = (await response.json()) as AuthorizeResponse;
 
-	if (isNullOrUndefined(gamba_session)) {
-		throw new Error('Failed to authorize user');
-	}
-
-	const responseData = await response.json();
-
-	return { ...responseData, gamba_session };
-}
-
-export async function verifySession(session: string): Promise<UserModel> {
-	const response = await fetch(ApiRoutes.User.Me, {
-		headers: {
-			'Set-Cookie': session
-		}
-	});
-
-	return response.json();
+	return {
+		...data,
+		gamba_session: cookie?.split('=')[1].split(';')[0] || ''
+	};
 }
