@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
 			}
 		});
 		const res = await user.json();
-		console.log(res, cookie);
 
 		return NextResponse.json(res);
 	} catch (error) {
